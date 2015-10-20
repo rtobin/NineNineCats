@@ -21,11 +21,12 @@ class CatRentalRequest < ActiveRecord::Base
 
 
 
-  private
+  # private
     def overlapping_requests
-      CatRentalRequest.where("end_date > ?", self.start_date)
-        .where("start_date < ?", self.end_date)
+      CatRentalRequest.where("end_date >= ?", self.start_date)
+        .where("start_date <= ?", self.end_date)
         .where("cat_id = ?", self.cat_id)
+        .where("id != ?", self.id)
     end
 
     def overlapping_approved_requests
