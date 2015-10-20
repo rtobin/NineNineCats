@@ -26,7 +26,7 @@ class CatRentalRequest < ActiveRecord::Base
       CatRentalRequest.where("end_date >= ?", self.start_date)
         .where("start_date <= ?", self.end_date)
         .where("cat_id = ?", self.cat_id)
-        .where("id != ?", self.id)
+        #.where("id != ?", self.id)
     end
 
     def overlapping_approved_requests
@@ -34,6 +34,8 @@ class CatRentalRequest < ActiveRecord::Base
     end
 
     def custom
-      overlapping_approved_requests.empty?
+      unless overlapping_approved_requests.empty?
+        errors.add(:dates, "can't overlap with other renter's rental period!")
+      end
     end
 end
