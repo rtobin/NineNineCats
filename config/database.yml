@@ -81,5 +81,5 @@ test:
 production:
   <<: *default
   database: NineNineCats_production
-  username: NineNineCats
-  password: <%= ENV['NINENINECATS_DATABASE_PASSWORD'] %>
+  # username: NineNineCats
+  # password: <%= ENV['NINENINECATS_DATABASE_PASSWORD'] %>

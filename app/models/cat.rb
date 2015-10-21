@@ -14,13 +14,13 @@
 
 class Cat < ActiveRecord::Base
   SEC_TO_YR = 60*60*24*365
-
+  CAT_SEXES = ['M', 'F']
   CAT_COLORS = ['brown', 'black',
     'orange', 'green', 'white', 'striped', 'spotted']
 
   validates :name, :sex, :birth_date, presence: true
-  validates :color, inclusion: { in: CAT_COLORS }
-  validates :sex, inclusion: { in: ['M', 'F']}
+  validates :color, inclusion: { in: CAT_COLORS, message: "Invalid color!" }
+  validates :sex, inclusion: { in: CAT_SEXES, message: "Invalid sex!" }
 
 
   has_many :cat_rental_requests, dependent: :destroy
