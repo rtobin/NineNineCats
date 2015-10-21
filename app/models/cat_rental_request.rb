@@ -14,14 +14,30 @@
 class CatRentalRequest < ActiveRecord::Base
   validates :cat_id, :start_date, :end_date, :status, presence: true
   validates :status, inclusion: { in: ["PENDING", "APPROVED", "DENIED"] }
-  validate :custom
+  validate :validate_no_overlap
+  validate :valid_start_end_dates
 
 
   belongs_to :cat
 
+  def approve!
+    CatRentalRequest.transaction do
+      self.status = "APPROVED"
+      self.save!
+      overlapping_pending_requests.each(&:deny!)
+    end
+  end
 
+  def deny!
+    self.status = "DENIED"
+    self.save!
+  end
 
-  # private
+  def pending?
+    self.status == "PENDING"
+  end
+
+  private
     def overlapping_requests
       CatRentalRequest.where("end_date >= ?", self.start_date)
         .where("start_date <= ?", self.end_date)
@@ -33,9 +49,23 @@ class CatRentalRequest < ActiveRecord::Base
       overlapping_requests.where("status = 'APPROVED'")
     end
 
-    def custom
-      unless overlapping_approved_requests.empty?
-        errors.add(:dates, "can't overlap with other renter's rental period!")
+    def overlapping_approved_requests
+      overlapping_requests.where("status = 'PENDING'")
+    end
+
+    # custom validations
+    def validate_no_overlap
+      if self.status == "APPROVED" && !overlapping_approved_requests.empty?
+        errors.add(:overlapping_dates,
+          "Can't overlap with other rental period!")
       end
     end
+
+    def valid_start_end_dates
+      if self.start_date > self.end_date
+        errors.add(:overlapping_dates, "Invalid rental period!")
+      end
+    end
+
+
 end
